@@ -239,6 +239,10 @@ body {
 	width: 100%;
 }
 
+.spinner--hide {
+	display: none;
+}
+
 .spinner:after {
 	content: ' ';
 	display: block;

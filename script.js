@@ -3,22 +3,23 @@ const API_URL =
 	'https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json';
 
 // declaration of items creating product list
-let $ulList;
-let $listItem;
+let ulList;
+let listItem;
+let loadingSpinner;
 
 // error message paragraph
-let $errorInfo;
+let errorInfo;
 
 // The array which store all items from API
-let $dataArr = [];
+let dataArr = [];
 // The array which store all items in cart
-let $cartArr = [];
+let cartArr = [];
 
 // declaration of items creating cart
-let $ulListCart;
-let $cartOrder;
-let $cartEmpty;
-let $cartTotal;
+let ulListCart;
+let cartOrder;
+let cartEmpty;
+let cartTotal;
 
 const main = () => {
 	prepareDOMElements();
@@ -26,79 +27,80 @@ const main = () => {
 };
 
 const prepareDOMElements = () => {
-	$ulList = document.querySelector('#product-container');
-	$cartOrder = document.querySelector('#cart-order');
-	$ulListCart = document.querySelector('#cart-list');
+	ulList = document.querySelector('#product-container');
+	cartOrder = document.querySelector('#cart-order');
+	ulListCart = document.querySelector('#cart-list');
+	loadingSpinner = document.querySelector('.spinner');
 };
 
 const prepareDOMEvents = () => {
-	$ulList.addEventListener('click', orderButtonHandler);
-	$ulListCart.addEventListener('click', removeButtonHandler);
+	ulList.addEventListener('click', orderButtonHandler);
+	ulListCart.addEventListener('click', removeButtonHandler);
 };
 
 const fetchData = async () => {
-	// loading spinner before we fetch all the data
-	const ulList = document.querySelector('#product-container');
-	const loadingSpinner = document.createElement('div');
-	loadingSpinner.classList.add('spinner');
-	ulList.appendChild(loadingSpinner);
-
 	const response = await fetch(API_URL);
-
 	if (!response.ok) {
 		const message = `An error has occured: ${response.status}`;
 		throw new Error(message);
 	}
-	const data = await response.json();
-
-	// loading spinner removed
-	loadingSpinner.remove();
-
-	return data;
+	return response.json();
 };
 
-fetchData()
-	.then((data) => {
-		data.map((item) => {
-			$dataArr.push(item);
-			$listItem = document.createElement('li');
-			$listItem.classList.add('product__item');
-			$listItem.setAttribute('id', `${item.id}`);
-			$ulList.appendChild($listItem);
-
-			$listItem.innerHTML = `
-			<img
-				src="${item.image}"
-				alt="${item.title}"
-				class="product__img"
-			/>
-			<div class="product__box">
-				<h3>${item.title}</h3>
-				<p class="product__description">
-					${item.ingredients.join(', ')}
-				</p>
-			</div>
-			<div class="product__actions">
-				<p class="product__price">${item.price.toFixed(2)}</p>
-				<button type="button" id="orderBtn" class="button button--order">Zamów</button>
-			</div>
-			`;
+const renderData = async () => {
+	try {
+		await fetchData().then((data) => {
+			loadingSpinner.classList.add('spinner--hide');
+			renderPizzaList(data);
 		});
-	})
-	.catch((error) => {
-		const loadingSpinner = document.querySelector('.spinner');
-		loadingSpinner.remove();
-		$errorInfo = document.createElement('p');
-		$errorInfo.classList.add('product__item', 'product__item--error');
-		$errorInfo.innerText = `${error.message}`;
-		$ulList.appendChild($errorInfo);
+	} catch (error) {
+		loadingSpinner.classList.add('spinner--hide');
+		renderError(error);
+	}
+};
+
+renderData();
+
+const renderError = (error) => {
+	errorInfo = document.createElement('p');
+	errorInfo.classList.add('product__item', 'product__item--error');
+	errorInfo.innerText = `${error.message}`;
+	ulList.appendChild(errorInfo);
+};
+
+const renderPizzaList = (data) => {
+	data.map((item) => {
+		dataArr.push(item);
+		listItem = document.createElement('li');
+		listItem.classList.add('product__item');
+		listItem.setAttribute('id', `${item.id}`);
+		ulList.appendChild(listItem);
+
+		listItem.innerHTML = `
+		<img
+			src="${item.image}"
+			alt="${item.title}"
+			class="product__img"
+		/>
+		<div class="product__box">
+			<h3>${item.title}</h3>
+			<p class="product__description">
+			${item.ingredients.join(', ')}
+			</p>
+		</div>
+		<div class="product__actions">
+			<p class="product__price">${item.price.toFixed(2)}</p>
+			<button type="button" id="orderBtn" class="button button--order">Zamów</button>
+		</div>
+		`;
 	});
+};
 
 // the function executes when order button is clicked
 const orderButtonHandler = (e) => {
 	if (e.target.matches('#orderBtn')) {
 		const itemID = e.target.closest('li').id;
-		$dataArr.forEach((item) => {
+		dataArr.forEach((item) => {
 			if (item.id == itemID) {
 				const quantity = 1;
 				addItemToCart({
@@ -119,7 +121,7 @@ const addItemToCart = (item) => {
 	// and call functions for total price and the number of items in badge header.
 	let alreadyInCart = false;
 
-	$cartArr.forEach((el) => {
+	cartArr.forEach((el) => {
 		if (el.id === item.id) {
 			alreadyInCart = true;
 			el.quantity++;
@@ -132,7 +134,7 @@ const addItemToCart = (item) => {
 	// this code executes only when the item is not on the cart list yet
 	// Function adds new item to cart
 	if (!alreadyInCart) {
-		$cartArr.push(item);
+		cartArr.push(item);
 		badgeHandler();
 		cartHandler();
 		totalPriceHandler();
@@ -161,15 +163,15 @@ const addItemToCart = (item) => {
 const removeButtonHandler = (e) => {
 	if (e.target.matches('#removeBtn')) {
 		const cartItem = e.target.closest('li');
-		$cartArr.forEach((el) => {
+		cartArr.forEach((el) => {
 			if (el.id == cartItem.id) {
 				if (el.quantity === 1) {
-					const index = $cartArr.findIndex((item) => item.id == cartItem.id);
-					$cartArr.splice(index, 1);
+					const index = cartArr.findIndex((item) => item.id == cartItem.id);
+					cartArr.splice(index, 1);
 					badgeHandler();
 					totalPriceHandler();
 					cartItem.remove();
-					if ($cartArr.length === 0) {
+					if (cartArr.length === 0) {
 						cartHandler();
 					}
 				} else {
@@ -187,26 +189,26 @@ const removeButtonHandler = (e) => {
 
 // this function executes only if the first item is added to cart or the last item is removed from cart
 const cartHandler = () => {
-	if ($cartArr.length === 0) {
+	if (cartArr.length === 0) {
 		// when the last item from cart is removed, function removing total price information and render another paragraph
-		$cartEmpty = document.createElement('div');
-		$cartEmpty.classList.add('cart__empty');
-		$cartEmpty.setAttribute('id', 'empty');
-		$cartEmpty.innerHTML = '<p>Głodny?<br />Zamów naszą pizzę!</p>';
-		$cartOrder.appendChild($cartEmpty);
-		$cartTotal.remove();
-	} else if ($cartArr.length === 1) {
+		cartEmpty = document.createElement('div');
+		cartEmpty.classList.add('cart__empty');
+		cartEmpty.setAttribute('id', 'empty');
+		cartEmpty.innerHTML = '<p>Głodny?<br />Zamów naszą pizzę!</p>';
+		cartOrder.appendChild(cartEmpty);
+		cartTotal.remove();
+	} else if (cartArr.length === 1) {
 		// when first item is added to the cart, removes a paragraph and adding info about total price of all items.
 		const cartEmptyToRemove = document.querySelector('#empty');
 		cartEmptyToRemove.remove();
 
-		$cartTotal = document.createElement('div');
-		$cartTotal.classList.add('cart__total');
-		$cartOrder.appendChild($cartTotal);
+		cartTotal = document.createElement('div');
+		cartTotal.classList.add('cart__total');
+		cartOrder.appendChild(cartTotal);
 		const cartTotalContent = `
         <span>Do zapłaty:</span>
         <span id="total-price"></span>`;
-		$cartTotal.innerHTML = cartTotalContent;
+		cartTotal.innerHTML = cartTotalContent;
 	}
 };
 
@@ -215,8 +217,8 @@ const cartHandler = () => {
 const badgeHandler = () => {
 	const badge = document.querySelector('#badge');
 	let badgeValue = 0;
-	for (let i = 0; i < $cartArr.length; i++) {
-		badgeValue = badgeValue + $cartArr[i].quantity;
+	for (let i = 0; i < cartArr.length; i++) {
+		badgeValue = badgeValue + cartArr[i].quantity;
 	}
 	badge.innerText = badgeValue;
 };
@@ -226,9 +228,8 @@ const badgeHandler = () => {
 const totalPriceHandler = () => {
 	const totalPrice = document.querySelector('#total-price');
 	let totalPriceValue = 0;
-	for (let i = 0; i < $cartArr.length; i++) {
-		totalPriceValue =
-			totalPriceValue + $cartArr[i].quantity * $cartArr[i].price;
+	for (let i = 0; i < cartArr.length; i++) {
+		totalPriceValue = totalPriceValue + cartArr[i].quantity * cartArr[i].price;
 	}
 	totalPrice.innerText = totalPriceValue.toFixed(2);
 };
