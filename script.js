@@ -6,12 +6,13 @@ const API_URL =
 let ulList;
 let listItem;
 let loadingSpinner;
+let orderButtons;
 
 // error message paragraph
 let errorInfo;
 
 // The array which store all items from API
-let dataArr = [];
+let pizzaList = [];
 // The array which store all items in cart
 let cartArr = [];
 
@@ -34,7 +35,6 @@ const prepareDOMElements = () => {
 };
 
 const prepareDOMEvents = () => {
-	ulList.addEventListener('click', orderButtonHandler);
 	ulListCart.addEventListener('click', removeButtonHandler);
 };
 
@@ -69,8 +69,9 @@ const renderError = (error) => {
 };
 
 const renderPizzaList = (data) => {
+	pizzaList = data;
+
 	data.map((item) => {
-		dataArr.push(item);
 		listItem = document.createElement('li');
 		listItem.classList.add('product__item');
 		listItem.setAttribute('id', `${item.id}`);
@@ -90,17 +91,23 @@ const renderPizzaList = (data) => {
 		</div>
 		<div class="product__actions">
 			<p class="product__price">${item.price.toFixed(2)}</p>
-			<button type="button" id="orderBtn" class="button button--order">Zamów</button>
+			<button type="button" class="button button--order">Zamów</button>
 		</div>
 		`;
 	});
+
+	orderButtons = ulList.querySelectorAll('.button--order');
+	orderButtons.forEach((btn) => {
+		btn.addEventListener('click', orderButtonHandler);
+	});
 };
+
 
 // the function executes when order button is clicked
 const orderButtonHandler = (e) => {
-	if (e.target.matches('#orderBtn')) {
+	if (e.target.matches('.button--order')) {
 		const itemID = e.target.closest('li').id;
-		dataArr.forEach((item) => {
+		pizzaList.forEach((item) => {
 			if (item.id == itemID) {
 				const quantity = 1;
 				addItemToCart({
