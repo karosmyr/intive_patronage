@@ -1,26 +1,18 @@
 // api url
 const API_URL =
     "https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json";
-
 // declaration of items creating product list
-let ulList = document.querySelector(".product__container");
-let listItem;
-let loadingSpinner = document.querySelector(".spinner");
-let orderButtons;
-
-// error message paragraph
-let errorInfo;
+const ulList = document.querySelector(".product__container");
+const loadingSpinner = document.querySelector(".spinner");
+// declaration of items creating cart
+const ulListCart = document.querySelector(".cart__list");
+const cartEmpty = document.querySelector(".cart__empty");
+const cartTotal = document.querySelector(".cart__total");
 
 // The array which store all items from API
 let pizzaList = [];
 // The array which store all items in cart
 let cartArr = [];
-
-// declaration of items creating cart
-let ulListCart = document.querySelector(".cart__list");
-let cartEmpty = document.querySelector(".cart__empty");
-let cartTotal = document.querySelector(".cart__total");
-let removeButtons;
 
 const fetchData = async () => {
     const response = await fetch(API_URL);
@@ -46,7 +38,7 @@ const renderData = async () => {
 renderData();
 
 const renderError = (error) => {
-    errorInfo = document.createElement("p");
+    const errorInfo = document.createElement("p");
     errorInfo.classList.add("product__item", "product__item--error");
     errorInfo.innerText = `${error.message}`;
     ulList.appendChild(errorInfo);
@@ -56,7 +48,7 @@ const renderPizzaList = (data) => {
     pizzaList = data;
 
     data.map((item) => {
-        listItem = document.createElement("li");
+        const listItem = document.createElement("li");
         listItem.classList.add("product__item");
         listItem.setAttribute("id", `${item.id}`);
         ulList.appendChild(listItem);
@@ -80,7 +72,7 @@ const renderPizzaList = (data) => {
 		`;
     });
 
-    orderButtons = ulList.querySelectorAll(".button--order");
+    const orderButtons = ulList.querySelectorAll(".button--order");
     orderButtons.forEach((btn) => {
         btn.addEventListener("click", orderButtonHandler);
     });
@@ -128,7 +120,6 @@ const removeButtonHandler = (e) => {
 };
 
 const updateCart = () => {
-    ulListCart = document.querySelector(".cart__list");
     while (ulListCart.firstChild) {
         ulListCart.removeChild(ulListCart.firstChild);
     }
@@ -154,7 +145,7 @@ const updateCart = () => {
         cartItem.innerHTML = cartItemContent;
     });
 
-    removeButtons = ulListCart.querySelectorAll(".button--remove");
+    const removeButtons = ulListCart.querySelectorAll(".button--remove");
     removeButtons.forEach((btn) => {
         btn.addEventListener("click", removeButtonHandler);
     });
