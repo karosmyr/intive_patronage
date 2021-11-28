@@ -1,6 +1,5 @@
 // api url
-const API_URL =
-	'https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json';
+const API_URL = 'https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json';
 
 // declaration of items creating product list
 let ulList;
@@ -18,24 +17,16 @@ let cartArr = [];
 
 // declaration of items creating cart
 let ulListCart;
-let cartOrder;
 let cartEmpty;
 let cartTotal;
-
-const main = () => {
-	prepareDOMElements();
-	prepareDOMEvents();
-};
+let removeButtons;
 
 const prepareDOMElements = () => {
-	ulList = document.querySelector('#product-container');
-	cartOrder = document.querySelector('#cart-order');
-	ulListCart = document.querySelector('#cart-list');
+	ulList = document.querySelector('.product__container');
+	ulListCart = document.querySelector('.cart__list');
 	loadingSpinner = document.querySelector('.spinner');
-};
-
-const prepareDOMEvents = () => {
-	ulListCart.addEventListener('click', removeButtonHandler);
+	cartEmpty = document.querySelector('.cart__empty');
+	cartTotal = document.querySelector('.cart__total');
 };
 
 const fetchData = async () => {
@@ -102,143 +93,106 @@ const renderPizzaList = (data) => {
 	});
 };
 
-
 // the function executes when order button is clicked
 const orderButtonHandler = (e) => {
 	if (e.target.matches('.button--order')) {
 		const itemID = e.target.closest('li').id;
-		pizzaList.forEach((item) => {
-			if (item.id == itemID) {
-				const quantity = 1;
-				addItemToCart({
-					id: item.id,
-					title: item.title,
-					price: item.price,
-					quantity,
-				});
-			}
+		const itemToAdd = pizzaList.find((item) => item.id == itemID);
+		addItemToCart({
+			id: itemToAdd.id,
+			title: itemToAdd.title,
+			price: itemToAdd.price,
+			quantity: 1,
 		});
 	}
 };
 
-// the function adds an item to the cart
 const addItemToCart = (item) => {
-	// Firstly the function is checking if the item is not on the cart list yet,
-	// if the item is already on the list, this function changes only the quantity,
-	// and call functions for total price and the number of items in badge header.
-	let alreadyInCart = false;
-
-	cartArr.forEach((el) => {
-		if (el.id === item.id) {
-			alreadyInCart = true;
-			el.quantity++;
-			const amount = document.querySelector(`#cart-${el.id}`);
-			amount.innerText = el.quantity;
-			badgeHandler();
-			totalPriceHandler();
-		}
-	});
-	// this code executes only when the item is not on the cart list yet
-	// Function adds new item to cart
-	if (!alreadyInCart) {
+	const alreadyInCart = cartArr.find((el) => el.id === item.id);
+	if (alreadyInCart) {
+		alreadyInCart.quantity++;
+	} else {
 		cartArr.push(item);
-		badgeHandler();
-		cartHandler();
-		totalPriceHandler();
-		const cartList = document.querySelector('#cart-list');
-		const cartItem = document.createElement('li');
-		cartItem.classList.add('cart__item');
-		cartItem.setAttribute('id', `${item.id}`);
-		cartList.appendChild(cartItem);
-
-		const cartItemContent = `
-    <div>
-        <h3 class="cart__item-title">${item.title}</h3>
-        <div class="cart__item-summary">
-            <span class="cart__item-price">${item.price.toFixed(2)}</span>
-            <span class="cart__item-amount">x <span id="cart-${item.id}">${
-			item.quantity
-		}</span></span>
-        </div>
-    </div>
-    <button type="button" id="removeBtn" class="button button--remove">Usuń</button>`;
-		cartItem.innerHTML = cartItemContent;
 	}
+	updateCart();
 };
 
 // Function removes an item from the cart
 const removeButtonHandler = (e) => {
-	if (e.target.matches('#removeBtn')) {
-		const cartItem = e.target.closest('li');
-		cartArr.forEach((el) => {
-			if (el.id == cartItem.id) {
-				if (el.quantity === 1) {
-					const index = cartArr.findIndex((item) => item.id == cartItem.id);
-					cartArr.splice(index, 1);
-					badgeHandler();
-					totalPriceHandler();
-					cartItem.remove();
-					if (cartArr.length === 0) {
-						cartHandler();
-					}
-				} else {
-					// if there is more items then 1, function changes quantity of items by 1
-					el.quantity--;
-					const amount = document.querySelector(`#cart-${el.id}`);
-					amount.innerText = el.quantity;
-					badgeHandler();
-					totalPriceHandler();
-				}
-			}
-		});
+	if (e.target.matches('.button--remove')) {
+		const cartItemID = e.target.closest('li').id;
+		const itemToRemove = cartArr.find((el) => el.id == cartItemID);
+		if (itemToRemove.quantity === 1) {
+			const index = cartArr.findIndex((item) => item.id === itemToRemove.id);
+			cartArr.splice(index, 1);
+		} else {
+			itemToRemove.quantity--;
+		}
+		updateCart();
 	}
 };
 
-// this function executes only if the first item is added to cart or the last item is removed from cart
+const updateCart = () => {
+	ulListCart = document.querySelector('.cart__list');
+	while (ulListCart.firstChild) {
+		ulListCart.removeChild(ulListCart.firstChild);
+	}
+
+	cartArr.forEach((item) => {
+		const ulList = document.querySelector('.cart__list');
+		const cartItem = document.createElement('li');
+		cartItem.classList.add('cart__item');
+		cartItem.setAttribute('id', `${item.id}`);
+		ulList.appendChild(cartItem);
+
+		const cartItemContent = `
+			<div>
+				<h3 class="cart__item-title">${item.title}</h3>
+				<div class="cart__item-summary">
+					<span class="cart__item-price">${item.price.toFixed(2)} zł</span>
+					<span class="cart__item-amount">x <span id="cart-${item.id}">
+					${item.quantity}
+					</span></span>
+				</div>
+			</div>
+			<button type="button" class="button button--remove">Usuń</button>`;
+		cartItem.innerHTML = cartItemContent;
+	});
+
+	removeButtons = ulListCart.querySelectorAll('.button--remove');
+	removeButtons.forEach((btn) => {
+		btn.addEventListener('click', removeButtonHandler);
+	});
+
+	cartHandler();
+	badgeHandler();
+	totalPriceHandler();
+};
+
 const cartHandler = () => {
 	if (cartArr.length === 0) {
-		// when the last item from cart is removed, function removing total price information and render another paragraph
-		cartEmpty = document.createElement('div');
-		cartEmpty.classList.add('cart__empty');
-		cartEmpty.setAttribute('id', 'empty');
-		cartEmpty.innerHTML = '<p>Głodny?<br />Zamów naszą pizzę!</p>';
-		cartOrder.appendChild(cartEmpty);
-		cartTotal.remove();
-	} else if (cartArr.length === 1) {
-		// when first item is added to the cart, removes a paragraph and adding info about total price of all items.
-		const cartEmptyToRemove = document.querySelector('#empty');
-		cartEmptyToRemove.remove();
-
-		cartTotal = document.createElement('div');
-		cartTotal.classList.add('cart__total');
-		cartOrder.appendChild(cartTotal);
-		const cartTotalContent = `
-        <span>Do zapłaty:</span>
-        <span id="total-price"></span>`;
-		cartTotal.innerHTML = cartTotalContent;
+		cartTotal.classList.add('cart__total--hide');
+		cartEmpty.classList.remove('cart__empty--hide');
+	} else {
+		cartTotal.classList.remove('cart__total--hide');
+		cartEmpty.classList.add('cart__empty--hide');
 	}
 };
 
 // function checking the amount of all items and assigns this value to the badge
 // the function is executed each time any button is pressed
 const badgeHandler = () => {
-	const badge = document.querySelector('#badge');
-	let badgeValue = 0;
-	for (let i = 0; i < cartArr.length; i++) {
-		badgeValue = badgeValue + cartArr[i].quantity;
-	}
+	const badge = document.querySelector('.cart__badge');
+	let badgeValue = cartArr.reduce((total, item) => total + item.quantity, 0);
 	badge.innerText = badgeValue;
 };
 
 // function checking total price of all items from the cart
 // the function is executed each time any button is pressed
 const totalPriceHandler = () => {
-	const totalPrice = document.querySelector('#total-price');
-	let totalPriceValue = 0;
-	for (let i = 0; i < cartArr.length; i++) {
-		totalPriceValue = totalPriceValue + cartArr[i].quantity * cartArr[i].price;
-	}
-	totalPrice.innerText = totalPriceValue.toFixed(2);
+	const totalPrice = document.querySelector('.total__price');
+	let totalPriceValue = cartArr.reduce((total, item) => total + item.price * item.quantity, 0);
+	totalPrice.innerText = totalPriceValue.toFixed(2) + ' zł';
 };
 
-document.addEventListener('DOMContentLoaded', main);
+document.addEventListener('DOMContentLoaded', prepareDOMElements);
