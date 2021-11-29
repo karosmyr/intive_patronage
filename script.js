@@ -47,7 +47,7 @@ const renderError = (error) => {
 const renderPizzaList = (data) => {
     pizzaList = data;
 
-    data.map((item) => {
+    data.forEach((item) => {
         const listItem = document.createElement("li");
         listItem.classList.add("product__item");
         listItem.setAttribute("id", `${item.id}`);
@@ -80,16 +80,14 @@ const renderPizzaList = (data) => {
 
 // the function executes when order button is clicked
 const orderButtonHandler = (e) => {
-    if (e.target.matches(".button--order")) {
-        const itemID = e.target.closest("li").id;
-        const itemToAdd = pizzaList.find((item) => item.id == itemID);
-        addItemToCart({
-            id: itemToAdd.id,
-            title: itemToAdd.title,
-            price: itemToAdd.price,
-            quantity: 1,
-        });
-    }
+    const itemID = e.target.closest("li").id;
+    const itemToAdd = pizzaList.find((item) => item.id == itemID);
+    addItemToCart({
+        id: itemToAdd.id,
+        title: itemToAdd.title,
+        price: itemToAdd.price,
+        quantity: 1,
+    });
 };
 
 const addItemToCart = (item) => {
@@ -104,25 +102,19 @@ const addItemToCart = (item) => {
 
 // Function removes an item from the cart
 const removeButtonHandler = (e) => {
-    if (e.target.matches(".button--remove")) {
-        const cartItemID = e.target.closest("li").id;
-        const itemToRemove = cartArr.find((el) => el.id == cartItemID);
-        if (itemToRemove.quantity === 1) {
-            const index = cartArr.findIndex(
-                (item) => item.id === itemToRemove.id
-            );
-            cartArr.splice(index, 1);
-        } else {
-            itemToRemove.quantity--;
-        }
-        updateCart();
+    const cartItemID = e.target.closest("li").id;
+    const itemToRemove = cartArr.find((el) => el.id == cartItemID);
+    if (itemToRemove.quantity === 1) {
+        const index = cartArr.findIndex((item) => item.id === itemToRemove.id);
+        cartArr.splice(index, 1);
+    } else {
+        itemToRemove.quantity--;
     }
+    updateCart();
 };
 
 const updateCart = () => {
-    while (ulListCart.firstChild) {
-        ulListCart.removeChild(ulListCart.firstChild);
-    }
+    ulListCart.innerHTML = '';
 
     cartArr.forEach((item) => {
         const ulList = document.querySelector(".cart__list");
