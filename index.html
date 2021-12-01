@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>pizzaApp</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="./style.css" />
+    </head>
+
+    <body>
+        <main class="main">
+            <section class="product">
+                <h2 class="product__header">Wybierz pizze:</h2>
+                <div class="product__wrapper">
+                    <ul class="product__container">
+                        <div class="spinner"></div>
+                    </ul>
+                </div>
+            </section>
+            <section class="cart">
+                <h2 class="cart__header">
+                    <span>Koszyk</span>
+                    <div class="badge__container">
+                        <span id="badge" class="cart__badge">0</span>
+                    </div>
+                </h2>
+                <div id="cart-order" class="cart__order">
+                    <div id="empty" class="cart__empty">
+                        <p>Głodny?<br />Zamów naszą pizzę!</p>
+                    </div>
+                    <ul class="cart__list"></ul>
+                    <div class="cart__total cart__total--hide">
+                        <span>Do zapłaty:</span>
+                        <span class="total__price"></span>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <script src="./script.js"></script>
+    </body>
+</html>
