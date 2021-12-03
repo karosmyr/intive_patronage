@@ -214,6 +214,15 @@ body {
     background-color: var(--remove__button--hover);
 }
 
+.button.button--removeAll {
+    padding: 0.5em 1em;
+    background-color: var(--remove__button);
+}
+
+.button.button--removeAll:hover {
+    background-color: var(--remove__button--hover);
+}
+
 /* SECTION CART */
 
 .cart {
@@ -306,7 +315,11 @@ body {
     margin: 1.5rem 0;
 }
 
-.cart__total--hide {
+.cart__items {
+    margin-bottom: 0.5em;
+}
+
+.cart__items--hide {
     display: none;
 }
 

@@ -8,7 +8,8 @@ const loadingSpinner = document.querySelector(".spinner");
 // declaration of items creating cart
 const ulListCart = document.querySelector(".cart__list");
 const cartEmpty = document.querySelector(".cart__empty");
-const cartTotal = document.querySelector(".cart__total");
+const cartItems = document.querySelector(".cart__items");
+const removeAllButton = document.querySelector(".button--removeAll");
 
 // declaration of items which handle cartButton for mobile version
 const cartButton = document.querySelector(".cart__icon");
@@ -37,6 +38,7 @@ const renderData = async () => {
         await fetchData().then((data) => {
             loadingSpinner.classList.add("spinner--hide");
             renderPizzaList(data);
+            updateCart();
         });
     } catch (error) {
         loadingSpinner.classList.add("spinner--hide");
@@ -106,6 +108,7 @@ const addItemToCart = (item) => {
     } else {
         cartArr.push(item);
     }
+    localStorage.setItem('cart', JSON.stringify(cartArr));
     updateCart();
 };
 
@@ -119,13 +122,19 @@ const removeButtonHandler = (e) => {
     } else {
         itemToRemove.quantity--;
     }
+    localStorage.setItem('cart', JSON.stringify(cartArr));
     updateCart();
 };
 
 const updateCart = () => {
     ulListCart.innerHTML = '';
 
-    cartArr.forEach((item) => {
+    let cartFromStorage = localStorage.getItem('cart');
+    cartFromStorage = JSON.parse(cartFromStorage);
+    console.log(cartFromStorage);
+    cartArr = cartFromStorage;
+
+    cartFromStorage.forEach((item) => {
         const ulList = document.querySelector(".cart__list");
         const cartItem = document.createElement("li");
         cartItem.classList.add("cart__item");
@@ -158,10 +167,10 @@ const updateCart = () => {
 
 const cartHandler = () => {
     if (cartArr.length === 0) {
-        cartTotal.classList.add("cart__total--hide");
+        cartItems.classList.add("cart__items--hide");
         cartEmpty.classList.remove("cart__empty--hide");
     } else {
-        cartTotal.classList.remove("cart__total--hide");
+        cartItems.classList.remove("cart__items--hide");
         cartEmpty.classList.add("cart__empty--hide");
     }
 };
@@ -193,4 +202,20 @@ const cartButtonHandler = () => {
     cancelIconSvg.classList.toggle("cartCancel__svg--hide");
 }
 
+const removeAllButtonHandler = () => {
+    cartArr = [];
+    localStorage.setItem('cart', JSON.stringify(cartArr));
+    updateCart();
+}
+
 cartButton.addEventListener('click', cartButtonHandler);
+removeAllButton.addEventListener('click', removeAllButtonHandler);
+
+window.addEventListener('resize', () => {
+    if (window.screen.width >= 992 && productSection.classList.contains('onlyCart')) {
+        productSection.classList.remove('onlyCart');
+        cartSection.classList.remove('cart--active');
+        cartIconSvg.classList.remove("cartIcon__svg--hide");
+        cancelIconSvg.classList.add("cartCancel__svg--hide");
+    }
+});
