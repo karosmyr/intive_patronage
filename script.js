@@ -37,6 +37,7 @@ const renderData = async () => {
     try {
         await fetchData().then((data) => {
             loadingSpinner.classList.add("spinner--hide");
+            sortData(data);
             renderPizzaList(data);
             updateCart();
         });
@@ -55,7 +56,21 @@ const renderError = (error) => {
     ulList.appendChild(errorInfo);
 };
 
+const sortData = (data) => {
+    const selectedOption = document.querySelector('.product--sort').value;
+    if (selectedOption === 'sortStrAsc') {
+        data.sort((a,b) => a.title.localeCompare(b.title));
+    } else if (selectedOption === 'sortStrDesc') {
+        data.sort((a,b) => b.title.localeCompare(a.title));
+    } else if (selectedOption === 'sortNumAsc') {
+        data.sort((a,b) => a.price - b.price);
+    } else if (selectedOption === 'sortNumDesc') {
+        data.sort((a,b) => b.price - a.price);
+    }
+}
+
 const renderPizzaList = (data) => {
+    ulList.innerHTML='';
     pizzaList = data;
 
     data.forEach((item) => {
@@ -131,7 +146,6 @@ const updateCart = () => {
 
     let cartFromStorage = localStorage.getItem('cart');
     cartFromStorage = JSON.parse(cartFromStorage);
-    console.log(cartFromStorage);
     cartArr = cartFromStorage;
 
     cartFromStorage.forEach((item) => {

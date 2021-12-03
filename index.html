@@ -42,6 +42,12 @@
         <main class="main">
             <section class="product">
                 <div class="product__wrapper">
+                    <select class="product--sort" onchange="renderData()">
+                        <option value="sortStrAsc" selected>po nazwie rosnąco (A-Z)</option>
+                        <option value="sortStrDesc">po nazwie malejąco (Z-A)</option>
+                        <option value="sortNumAsc">po cenie rosnąco</option>
+                        <option value="sortNumDesc">po cenie malejąco</option>
+                    </select>
                     <ul class="product__container">
                         <div class="spinner"></div>
                     </ul>
