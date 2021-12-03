@@ -1,3 +1,4 @@
+'use strict';
 // api url
 const API_URL =
     "https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json";
@@ -8,6 +9,14 @@ const loadingSpinner = document.querySelector(".spinner");
 const ulListCart = document.querySelector(".cart__list");
 const cartEmpty = document.querySelector(".cart__empty");
 const cartTotal = document.querySelector(".cart__total");
+
+// declaration of items which handle cartButton for mobile version
+const cartButton = document.querySelector(".cart__icon");
+const cartIconSvg = document.querySelector('.cartIcon__svg');
+const cancelIconSvg = document.querySelector('.cartCancel__svg');
+const cartSection = document.querySelector(".cart");
+const productSection = document.querySelector(".product");
+
 
 // The array which store all items from API
 let pizzaList = [];
@@ -160,9 +169,9 @@ const cartHandler = () => {
 // function checking the amount of all items and assigns this value to the badge
 // the function is executed each time any button is pressed
 const badgeHandler = () => {
-    const badge = document.querySelector(".cart__badge");
+    const badges = document.querySelectorAll(".cart__badge");
     let badgeValue = cartArr.reduce((total, item) => total + item.quantity, 0);
-    badge.innerText = badgeValue;
+    badges.forEach(badge => badge.innerText = badgeValue);
 };
 
 // function checking total price of all items from the cart
@@ -175,3 +184,13 @@ const totalPriceHandler = () => {
     );
     totalPrice.innerText = totalPriceValue.toFixed(2) + " zł";
 };
+
+
+const cartButtonHandler = () => {
+    cartSection.classList.toggle("cart--active");
+    productSection.classList.toggle("onlyCart");
+    cartIconSvg.classList.toggle("cartIcon__svg--hide");
+    cancelIconSvg.classList.toggle("cartCancel__svg--hide");
+}
+
+cartButton.addEventListener('click', cartButtonHandler);
