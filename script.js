@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 // api url
 const API_URL =
     "https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json";
@@ -13,11 +13,14 @@ const removeAllButton = document.querySelector(".button--removeAll");
 
 // declaration of items which handle cartButton for mobile version
 const cartButton = document.querySelector(".cart__icon");
-const cartIconSvg = document.querySelector('.cartIcon__svg');
-const cancelIconSvg = document.querySelector('.cartCancel__svg');
+const cartIconSvg = document.querySelector(".cartIcon__svg");
+const cancelIconSvg = document.querySelector(".cartCancel__svg");
 const cartSection = document.querySelector(".cart");
 const productSection = document.querySelector(".product");
 
+const selectedIngredients = document.querySelector(
+    ".product__ingredients--sort"
+);
 
 // The array which store all items from API
 let pizzaList = [];
@@ -38,7 +41,8 @@ const renderData = async () => {
         await fetchData().then((data) => {
             loadingSpinner.classList.add("spinner--hide");
             sortData(data);
-            renderPizzaList(data);
+            sortDataByIngredients(selectedIngredients.value, data);
+            // renderPizzaList(data);
             updateCart();
         });
     } catch (error) {
@@ -57,20 +61,34 @@ const renderError = (error) => {
 };
 
 const sortData = (data) => {
-    const selectedOption = document.querySelector('.product--sort').value;
-    if (selectedOption === 'sortStrAsc') {
-        data.sort((a,b) => a.title.localeCompare(b.title));
-    } else if (selectedOption === 'sortStrDesc') {
-        data.sort((a,b) => b.title.localeCompare(a.title));
-    } else if (selectedOption === 'sortNumAsc') {
-        data.sort((a,b) => a.price - b.price);
-    } else if (selectedOption === 'sortNumDesc') {
-        data.sort((a,b) => b.price - a.price);
+    const selectedOption = document.querySelector(".product--sort").value;
+    if (selectedOption === "sortStrAsc") {
+        data.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (selectedOption === "sortStrDesc") {
+        data.sort((a, b) => b.title.localeCompare(a.title));
+    } else if (selectedOption === "sortNumAsc") {
+        data.sort((a, b) => a.price - b.price);
+    } else if (selectedOption === "sortNumDesc") {
+        data.sort((a, b) => b.price - a.price);
     }
-}
+};
+
+const sortDataByIngredients = (ingredients, data) => {
+    const ingredientsArray = ingredients.split(', ')
+    console.log('ingredientsArray');
+    console.log(ingredientsArray);
+
+    const result = data.filter(item => ingredientsArray.every(elem => item.ingredients.includes(elem.toLowerCase())));
+
+    if (result.length === 0) {
+        renderPizzaList(data);
+    } else {
+        renderPizzaList(result);
+    }
+};
 
 const renderPizzaList = (data) => {
-    ulList.innerHTML='';
+    ulList.innerHTML = "";
     pizzaList = data;
 
     data.forEach((item) => {
@@ -123,7 +141,7 @@ const addItemToCart = (item) => {
     } else {
         cartArr.push(item);
     }
-    localStorage.setItem('cart', JSON.stringify(cartArr));
+    localStorage.setItem("cart", JSON.stringify(cartArr));
     updateCart();
 };
 
@@ -137,14 +155,14 @@ const removeButtonHandler = (e) => {
     } else {
         itemToRemove.quantity--;
     }
-    localStorage.setItem('cart', JSON.stringify(cartArr));
+    localStorage.setItem("cart", JSON.stringify(cartArr));
     updateCart();
 };
 
 const updateCart = () => {
-    ulListCart.innerHTML = '';
+    ulListCart.innerHTML = "";
 
-    let cartFromStorage = localStorage.getItem('cart');
+    let cartFromStorage = localStorage.getItem("cart");
     cartFromStorage = JSON.parse(cartFromStorage);
     cartArr = cartFromStorage;
 
@@ -194,7 +212,7 @@ const cartHandler = () => {
 const badgeHandler = () => {
     const badges = document.querySelectorAll(".cart__badge");
     let badgeValue = cartArr.reduce((total, item) => total + item.quantity, 0);
-    badges.forEach(badge => badge.innerText = badgeValue);
+    badges.forEach((badge) => (badge.innerText = badgeValue));
 };
 
 // function checking total price of all items from the cart
@@ -208,28 +226,32 @@ const totalPriceHandler = () => {
     totalPrice.innerText = totalPriceValue.toFixed(2) + " zł";
 };
 
-
 const cartButtonHandler = () => {
     cartSection.classList.toggle("cart--active");
     productSection.classList.toggle("onlyCart");
     cartIconSvg.classList.toggle("cartIcon__svg--hide");
     cancelIconSvg.classList.toggle("cartCancel__svg--hide");
-}
+};
 
 const removeAllButtonHandler = () => {
     cartArr = [];
-    localStorage.setItem('cart', JSON.stringify(cartArr));
+    localStorage.setItem("cart", JSON.stringify(cartArr));
     updateCart();
-}
+};
 
-cartButton.addEventListener('click', cartButtonHandler);
-removeAllButton.addEventListener('click', removeAllButtonHandler);
+cartButton.addEventListener("click", cartButtonHandler);
+removeAllButton.addEventListener("click", removeAllButtonHandler);
 
-window.addEventListener('resize', () => {
-    if (window.screen.width >= 992 && productSection.classList.contains('onlyCart')) {
-        productSection.classList.remove('onlyCart');
-        cartSection.classList.remove('cart--active');
+window.addEventListener("resize", () => {
+    if (
+        window.screen.width >= 992 &&
+        productSection.classList.contains("onlyCart")
+    ) {
+        productSection.classList.remove("onlyCart");
+        cartSection.classList.remove("cart--active");
         cartIconSvg.classList.remove("cartIcon__svg--hide");
         cancelIconSvg.classList.add("cartCancel__svg--hide");
     }
 });
+
+selectedIngredients.addEventListener("keyup", renderData);
