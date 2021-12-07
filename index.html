@@ -22,32 +22,31 @@
                         <span class="cart__badge">0</span>
                     </div>
                 </h2>
-                <button class="cart__icon">
-                    <object
-                        class="cartIcon__svg"
-                        data="cartIcon.svg"
-                        width="36"
-                    ></object>
-                    <object
-                        class="cartCancel__svg cartCancel__svg--hide"
-                        data="cartCancel.svg"
-                        width="60"
-                    ></object>
-                    <div class="cart__badge-container">
-                        <span class="cart__badge">0</span>
-                    </div>
-                </button>
             </div>
+            <button class="cart__icon">
+                <object
+                    class="cartIcon__svg"
+                    data="cartIcon.svg"
+                    width="36"
+                ></object>
+                <object
+                    class="cartCancel__svg cartCancel__svg--hide"
+                    data="cartCancel.svg"
+                    width="60"
+                ></object>
+                <div class="cart__badge-container">
+                    <span class="cart__badge">0</span>
+                </div>
+            </button>
         </header>
         <main class="main">
             <section class="product">
                 <div class="product__wrapper">
                     <div class="product__sort-container">
                         <input
-                            type='text'
+                            type="text"
                             class="product__select product__ingredients--sort"
                             placeholder="Wpisz składniki oddzielone przecinkiem (, )"
-                            onchange="renderData()"
                         />
                         <select
                             class="product__select product--sort"
@@ -59,8 +58,12 @@
                             <option value="sortStrDesc">
                                 sortuj po nazwie malejąco (Z-A)
                             </option>
-                            <option value="sortNumAsc">sortuj po cenie rosnąco</option>
-                            <option value="sortNumDesc">sortuj po cenie malejąco</option>
+                            <option value="sortNumAsc">
+                                sortuj po cenie rosnąco
+                            </option>
+                            <option value="sortNumDesc">
+                                sortuj po cenie malejąco
+                            </option>
                         </select>
                     </div>
                     <ul class="product__container">

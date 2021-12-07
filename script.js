@@ -1,10 +1,13 @@
 "use strict";
+
 // api url
 const API_URL =
     "https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json";
+
 // declaration of items creating product list
 const ulList = document.querySelector(".product__container");
 const loadingSpinner = document.querySelector(".spinner");
+
 // declaration of items creating cart
 const ulListCart = document.querySelector(".cart__list");
 const cartEmpty = document.querySelector(".cart__empty");
@@ -17,10 +20,7 @@ const cartIconSvg = document.querySelector(".cartIcon__svg");
 const cancelIconSvg = document.querySelector(".cartCancel__svg");
 const cartSection = document.querySelector(".cart");
 const productSection = document.querySelector(".product");
-
-const selectedIngredients = document.querySelector(
-    ".product__ingredients--sort"
-);
+const selectedIngredients = document.querySelector(".product__ingredients--sort");
 
 // The array which store all items from API
 let pizzaList = [];
@@ -42,7 +42,6 @@ const renderData = async () => {
             loadingSpinner.classList.add("spinner--hide");
             sortData(data);
             sortDataByIngredients(selectedIngredients.value, data);
-            // renderPizzaList(data);
             updateCart();
         });
     } catch (error) {
@@ -74,11 +73,12 @@ const sortData = (data) => {
 };
 
 const sortDataByIngredients = (ingredients, data) => {
-    const ingredientsArray = ingredients.split(', ')
-    console.log('ingredientsArray');
-    console.log(ingredientsArray);
-
-    const result = data.filter(item => ingredientsArray.every(elem => item.ingredients.includes(elem.toLowerCase())));
+    const ingredientsArray = ingredients.split(", ");
+    const result = data.filter((item) =>
+        ingredientsArray.every((elem) =>
+            item.ingredients.includes(elem.toLowerCase())
+        )
+    );
 
     if (result.length === 0) {
         renderPizzaList(data);
@@ -122,7 +122,6 @@ const renderPizzaList = (data) => {
     });
 };
 
-// the function executes when order button is clicked
 const orderButtonHandler = (e) => {
     const itemID = e.target.closest("li").id;
     const itemToAdd = pizzaList.find((item) => item.id == itemID);
@@ -145,7 +144,6 @@ const addItemToCart = (item) => {
     updateCart();
 };
 
-// Function removes an item from the cart
 const removeButtonHandler = (e) => {
     const cartItemID = e.target.closest("li").id;
     const itemToRemove = cartArr.find((el) => el.id == cartItemID);
@@ -162,11 +160,10 @@ const removeButtonHandler = (e) => {
 const updateCart = () => {
     ulListCart.innerHTML = "";
 
-    let cartFromStorage = localStorage.getItem("cart");
-    cartFromStorage = JSON.parse(cartFromStorage);
-    cartArr = cartFromStorage;
+    const cartFromStorage = localStorage.getItem("cart");
+    cartArr = JSON.parse(cartFromStorage);
 
-    cartFromStorage.forEach((item) => {
+    cartArr.forEach((item) => {
         const ulList = document.querySelector(".cart__list");
         const cartItem = document.createElement("li");
         cartItem.classList.add("cart__item");
@@ -207,16 +204,12 @@ const cartHandler = () => {
     }
 };
 
-// function checking the amount of all items and assigns this value to the badge
-// the function is executed each time any button is pressed
 const badgeHandler = () => {
     const badges = document.querySelectorAll(".cart__badge");
     let badgeValue = cartArr.reduce((total, item) => total + item.quantity, 0);
     badges.forEach((badge) => (badge.innerText = badgeValue));
 };
 
-// function checking total price of all items from the cart
-// the function is executed each time any button is pressed
 const totalPriceHandler = () => {
     const totalPrice = document.querySelector(".total__price");
     let totalPriceValue = cartArr.reduce(
@@ -241,7 +234,7 @@ const removeAllButtonHandler = () => {
 
 cartButton.addEventListener("click", cartButtonHandler);
 removeAllButton.addEventListener("click", removeAllButtonHandler);
-
+selectedIngredients.addEventListener("keyup", renderData);
 window.addEventListener("resize", () => {
     if (
         window.screen.width >= 992 &&
@@ -253,5 +246,3 @@ window.addEventListener("resize", () => {
         cancelIconSvg.classList.add("cartCancel__svg--hide");
     }
 });
-
-selectedIngredients.addEventListener("keyup", renderData);
