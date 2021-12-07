@@ -164,6 +164,12 @@ body {
     justify-content: center;
     align-items: center;
 }
+.product__filter-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--white);
+}
 
 .product__item {
     display: flex;

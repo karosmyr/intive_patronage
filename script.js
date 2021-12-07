@@ -7,6 +7,7 @@ const API_URL =
 // declaration of items creating product list
 const ulList = document.querySelector(".product__container");
 const loadingSpinner = document.querySelector(".spinner");
+const filterInfo = document.querySelector(".product__filter-info");
 
 // declaration of items creating cart
 const ulListCart = document.querySelector(".cart__list");
@@ -20,8 +21,9 @@ const cartIconSvg = document.querySelector(".cartIcon__svg");
 const cancelIconSvg = document.querySelector(".cartCancel__svg");
 const cartSection = document.querySelector(".cart");
 const productSection = document.querySelector(".product");
-const selectedIngredients = document.querySelector(".product__ingredients--sort");
-
+const selectedIngredients = document.querySelector(
+    ".product__ingredients--sort"
+);
 // The array which store all items from API
 let pizzaList = [];
 // The array which store all items in cart
@@ -41,7 +43,7 @@ const renderData = async () => {
         await fetchData().then((data) => {
             loadingSpinner.classList.add("spinner--hide");
             sortData(data);
-            sortDataByIngredients(selectedIngredients.value, data);
+            filterDataByIngredients(selectedIngredients.value, data);
             updateCart();
         });
     } catch (error) {
@@ -72,17 +74,20 @@ const sortData = (data) => {
     }
 };
 
-const sortDataByIngredients = (ingredients, data) => {
-    const ingredientsArray = ingredients.split(", ");
+const filterDataByIngredients = (ingredients, data) => {
+    const ingredientsArray = ingredients.split(",").map((item) => item.trim());
+
     const result = data.filter((item) =>
         ingredientsArray.every((elem) =>
-            item.ingredients.includes(elem.toLowerCase())
+            item.ingredients.join().includes(elem.toLowerCase())
         )
     );
 
     if (result.length === 0) {
-        renderPizzaList(data);
+        ulList.innerHTML = "";
+        filterInfo.innerHTML = "<p>Nie mamy pizzy z takimi składnikami.</p>";
     } else {
+        filterInfo.innerHTML = "";
         renderPizzaList(result);
     }
 };
@@ -161,7 +166,10 @@ const updateCart = () => {
     ulListCart.innerHTML = "";
 
     const cartFromStorage = localStorage.getItem("cart");
-    cartArr = JSON.parse(cartFromStorage);
+
+    if (cartFromStorage) {
+        cartArr = JSON.parse(cartFromStorage);
+    }
 
     cartArr.forEach((item) => {
         const ulList = document.querySelector(".cart__list");
@@ -228,7 +236,7 @@ const cartButtonHandler = () => {
 
 const removeAllButtonHandler = () => {
     cartArr = [];
-    localStorage.setItem("cart", JSON.stringify(cartArr));
+    localStorage.removeItem("cart");
     updateCart();
 };
 
