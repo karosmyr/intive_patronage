@@ -63,14 +63,22 @@ const renderError = (error) => {
 
 const sortData = (data) => {
     const selectedOption = document.querySelector(".product--sort").value;
-    if (selectedOption === "sortStrAsc") {
-        data.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (selectedOption === "sortStrDesc") {
-        data.sort((a, b) => b.title.localeCompare(a.title));
-    } else if (selectedOption === "sortNumAsc") {
-        data.sort((a, b) => a.price - b.price);
-    } else if (selectedOption === "sortNumDesc") {
-        data.sort((a, b) => b.price - a.price);
+
+    switch (selectedOption) {
+        case "sortStrAsc":
+            data.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+        case "sortStrDesc":
+            data.sort((a, b) => b.title.localeCompare(a.title));
+            break;
+        case "sortNumAsc":
+            data.sort((a, b) => a.price - b.price);
+            break;
+        case "sortNumDesc":
+            data.sort((a, b) => b.price - a.price);
+            break;
+        default:
+            data.sort((a, b) => a.title.localeCompare(b.title));
     }
 };
 
@@ -128,8 +136,8 @@ const renderPizzaList = (data) => {
 };
 
 const orderButtonHandler = (e) => {
-    const itemID = e.target.closest("li").id;
-    const itemToAdd = pizzaList.find((item) => item.id == itemID);
+    const itemID = +e.target.closest("li").id;
+    const itemToAdd = pizzaList.find((item) => item.id === itemID);
     addItemToCart({
         id: itemToAdd.id,
         title: itemToAdd.title,
@@ -150,8 +158,8 @@ const addItemToCart = (item) => {
 };
 
 const removeButtonHandler = (e) => {
-    const cartItemID = e.target.closest("li").id;
-    const itemToRemove = cartArr.find((el) => el.id == cartItemID);
+    const cartItemID = +e.target.closest("li").id;
+    const itemToRemove = cartArr.find((el) => el.id === cartItemID);
     if (itemToRemove.quantity === 1) {
         const index = cartArr.findIndex((item) => item.id === itemToRemove.id);
         cartArr.splice(index, 1);
