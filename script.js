@@ -251,14 +251,3 @@ const removeAllButtonHandler = () => {
 cartButton.addEventListener("click", cartButtonHandler);
 removeAllButton.addEventListener("click", removeAllButtonHandler);
 selectedIngredients.addEventListener("keyup", renderData);
-window.addEventListener("resize", () => {
-    if (
-        window.screen.width >= 992 &&
-        productSection.classList.contains("onlyCart")
-    ) {
-        productSection.classList.remove("onlyCart");
-        cartSection.classList.remove("cart--active");
-        cartIconSvg.classList.remove("cartIcon__svg--hide");
-        cancelIconSvg.classList.add("cartCancel__svg--hide");
-    }
-});
