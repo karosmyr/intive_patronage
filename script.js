@@ -8,6 +8,9 @@ const API_URL =
 const ulList = document.querySelector(".product__container");
 const loadingSpinner = document.querySelector(".spinner");
 const filterInfo = document.querySelector(".product__filter-info");
+const selectedIngredients = document.querySelector(
+    ".product__ingredients--sort"
+);
 
 // declaration of items creating cart
 const ulListCart = document.querySelector(".cart__list");
@@ -21,9 +24,7 @@ const cartIconSvg = document.querySelector(".cartIcon__svg");
 const cancelIconSvg = document.querySelector(".cartCancel__svg");
 const cartSection = document.querySelector(".cart");
 const productSection = document.querySelector(".product");
-const selectedIngredients = document.querySelector(
-    ".product__ingredients--sort"
-);
+
 // The array which store all items from API
 let pizzaList = [];
 // The array which store all items in cart
@@ -42,8 +43,8 @@ const renderData = async () => {
     try {
         await fetchData().then((data) => {
             loadingSpinner.classList.add("spinner--hide");
-            sortData(data);
-            filterDataByIngredients(selectedIngredients.value, data);
+            pizzaList = data;
+            renderProducts();
             updateCart();
         });
     } catch (error) {
@@ -61,9 +62,13 @@ const renderError = (error) => {
     ulList.appendChild(errorInfo);
 };
 
+const renderProducts = () => {
+    sortData(pizzaList);
+    filterDataByIngredients(selectedIngredients.value, pizzaList);
+};
+
 const sortData = (data) => {
     const selectedOption = document.querySelector(".product--sort").value;
-
     switch (selectedOption) {
         case "sortStrAsc":
             data.sort((a, b) => a.title.localeCompare(b.title));
@@ -84,55 +89,49 @@ const sortData = (data) => {
 
 const filterDataByIngredients = (ingredients, data) => {
     const ingredientsArray = ingredients.split(",").map((item) => item.trim());
-
     const result = data.filter((item) =>
         ingredientsArray.every((elem) =>
             item.ingredients.join().includes(elem.toLowerCase())
         )
     );
-
-    if (result.length === 0) {
-        ulList.innerHTML = "";
-        filterInfo.innerHTML = "<p>Nie mamy pizzy z takimi składnikami.</p>";
-    } else {
-        filterInfo.innerHTML = "";
-        renderPizzaList(result);
-    }
+    renderPizzaList(result);
 };
 
 const renderPizzaList = (data) => {
     ulList.innerHTML = "";
-    pizzaList = data;
+    if (data.length === 0) {
+        filterInfo.innerHTML = "<p>Nie mamy pizzy z takimi składnikami.</p>";
+    } else {
+        filterInfo.innerHTML = "";
+        data.forEach((item) => {
+            const listItem = document.createElement("li");
+            listItem.classList.add("product__item");
+            listItem.setAttribute("id", `${item.id}`);
+            ulList.appendChild(listItem);
+            listItem.innerHTML = `
+            <img
+                src="${item.image}"
+                alt="${item.title}"
+                class="product__img"
+            />
+            <div class="product__box">
+                <h3>${item.title}</h3>
+                <p class="product__description">
+                ${item.ingredients.join(", ")}
+                </p>
+            </div>
+            <div class="product__actions">
+                <p class="product__price">${item.price.toFixed(2)}</p>
+                <button type="button" class="button button--order">Zamów</button>
+            </div>
+            `;
+        });
 
-    data.forEach((item) => {
-        const listItem = document.createElement("li");
-        listItem.classList.add("product__item");
-        listItem.setAttribute("id", `${item.id}`);
-        ulList.appendChild(listItem);
-
-        listItem.innerHTML = `
-		<img
-			src="${item.image}"
-			alt="${item.title}"
-			class="product__img"
-		/>
-		<div class="product__box">
-			<h3>${item.title}</h3>
-			<p class="product__description">
-			${item.ingredients.join(", ")}
-			</p>
-		</div>
-		<div class="product__actions">
-			<p class="product__price">${item.price.toFixed(2)}</p>
-			<button type="button" class="button button--order">Zamów</button>
-		</div>
-		`;
-    });
-
-    const orderButtons = ulList.querySelectorAll(".button--order");
-    orderButtons.forEach((btn) => {
-        btn.addEventListener("click", orderButtonHandler);
-    });
+        const orderButtons = ulList.querySelectorAll(".button--order");
+        orderButtons.forEach((btn) => {
+            btn.addEventListener("click", orderButtonHandler);
+        });
+    }
 };
 
 const orderButtonHandler = (e) => {
@@ -174,7 +173,6 @@ const updateCart = () => {
     ulListCart.innerHTML = "";
 
     const cartFromStorage = localStorage.getItem("cart");
-
     if (cartFromStorage) {
         cartArr = JSON.parse(cartFromStorage);
     }
@@ -250,4 +248,4 @@ const removeAllButtonHandler = () => {
 
 cartButton.addEventListener("click", cartButtonHandler);
 removeAllButton.addEventListener("click", removeAllButtonHandler);
-selectedIngredients.addEventListener("keyup", renderData);
+selectedIngredients.addEventListener("keyup", renderProducts);
