@@ -1,13 +1,29 @@
+"use strict";
+
 // api url
 const API_URL =
     "https://raw.githubusercontent.com/alexsimkovich/patronage/main/api/data.json";
+
 // declaration of items creating product list
 const ulList = document.querySelector(".product__container");
 const loadingSpinner = document.querySelector(".spinner");
+const filterInfo = document.querySelector(".product__filter-info");
+const selectedIngredients = document.querySelector(
+    ".product__ingredients--sort"
+);
+
 // declaration of items creating cart
 const ulListCart = document.querySelector(".cart__list");
 const cartEmpty = document.querySelector(".cart__empty");
-const cartTotal = document.querySelector(".cart__total");
+const cartItems = document.querySelector(".cart__items");
+const removeAllButton = document.querySelector(".button--removeAll");
+
+// declaration of items which handle cartButton for mobile version
+const cartButton = document.querySelector(".cart__icon");
+const cartIconSvg = document.querySelector(".cartIcon__svg");
+const cancelIconSvg = document.querySelector(".cartCancel__svg");
+const cartSection = document.querySelector(".cart");
+const productSection = document.querySelector(".product");
 
 // The array which store all items from API
 let pizzaList = [];
@@ -27,7 +43,9 @@ const renderData = async () => {
     try {
         await fetchData().then((data) => {
             loadingSpinner.classList.add("spinner--hide");
-            renderPizzaList(data);
+            pizzaList = data;
+            renderProducts();
+            updateCart();
         });
     } catch (error) {
         loadingSpinner.classList.add("spinner--hide");
@@ -44,44 +62,81 @@ const renderError = (error) => {
     ulList.appendChild(errorInfo);
 };
 
-const renderPizzaList = (data) => {
-    pizzaList = data;
-
-    data.forEach((item) => {
-        const listItem = document.createElement("li");
-        listItem.classList.add("product__item");
-        listItem.setAttribute("id", `${item.id}`);
-        ulList.appendChild(listItem);
-
-        listItem.innerHTML = `
-		<img
-			src="${item.image}"
-			alt="${item.title}"
-			class="product__img"
-		/>
-		<div class="product__box">
-			<h3>${item.title}</h3>
-			<p class="product__description">
-			${item.ingredients.join(", ")}
-			</p>
-		</div>
-		<div class="product__actions">
-			<p class="product__price">${item.price.toFixed(2)}</p>
-			<button type="button" class="button button--order">Zamów</button>
-		</div>
-		`;
-    });
-
-    const orderButtons = ulList.querySelectorAll(".button--order");
-    orderButtons.forEach((btn) => {
-        btn.addEventListener("click", orderButtonHandler);
-    });
+const renderProducts = () => {
+    sortData(pizzaList);
+    filterDataByIngredients(selectedIngredients.value, pizzaList);
 };
 
-// the function executes when order button is clicked
+const sortData = (data) => {
+    const selectedOption = document.querySelector(".product--sort").value;
+    switch (selectedOption) {
+        case "sortStrAsc":
+            data.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+        case "sortStrDesc":
+            data.sort((a, b) => b.title.localeCompare(a.title));
+            break;
+        case "sortNumAsc":
+            data.sort((a, b) => a.price - b.price);
+            break;
+        case "sortNumDesc":
+            data.sort((a, b) => b.price - a.price);
+            break;
+        default:
+            data.sort((a, b) => a.title.localeCompare(b.title));
+    }
+};
+
+const filterDataByIngredients = (ingredients, data) => {
+    const ingredientsArray = ingredients.split(",").map((item) => item.trim());
+    const result = data.filter((item) =>
+        ingredientsArray.every((elem) =>
+            item.ingredients.join().includes(elem.toLowerCase())
+        )
+    );
+    renderPizzaList(result);
+};
+
+const renderPizzaList = (data) => {
+    ulList.innerHTML = "";
+    if (data.length === 0) {
+        filterInfo.innerHTML = "<p>Nie mamy pizzy z takimi składnikami.</p>";
+    } else {
+        filterInfo.innerHTML = "";
+        data.forEach((item) => {
+            const listItem = document.createElement("li");
+            listItem.classList.add("product__item");
+            listItem.setAttribute("id", `${item.id}`);
+            ulList.appendChild(listItem);
+            listItem.innerHTML = `
+            <img
+                src="${item.image}"
+                alt="${item.title}"
+                class="product__img"
+            />
+            <div class="product__box">
+                <h3>${item.title}</h3>
+                <p class="product__description">
+                ${item.ingredients.join(", ")}
+                </p>
+            </div>
+            <div class="product__actions">
+                <p class="product__price">${item.price.toFixed(2)}</p>
+                <button type="button" class="button button--order">Zamów</button>
+            </div>
+            `;
+        });
+
+        const orderButtons = ulList.querySelectorAll(".button--order");
+        orderButtons.forEach((btn) => {
+            btn.addEventListener("click", orderButtonHandler);
+        });
+    }
+};
+
 const orderButtonHandler = (e) => {
-    const itemID = e.target.closest("li").id;
-    const itemToAdd = pizzaList.find((item) => item.id == itemID);
+    const itemID = +e.target.closest("li").id;
+    const itemToAdd = pizzaList.find((item) => item.id === itemID);
     addItemToCart({
         id: itemToAdd.id,
         title: itemToAdd.title,
@@ -97,24 +152,30 @@ const addItemToCart = (item) => {
     } else {
         cartArr.push(item);
     }
+    localStorage.setItem("cart", JSON.stringify(cartArr));
     updateCart();
 };
 
-// Function removes an item from the cart
 const removeButtonHandler = (e) => {
-    const cartItemID = e.target.closest("li").id;
-    const itemToRemove = cartArr.find((el) => el.id == cartItemID);
+    const cartItemID = +e.target.closest("li").id;
+    const itemToRemove = cartArr.find((el) => el.id === cartItemID);
     if (itemToRemove.quantity === 1) {
         const index = cartArr.findIndex((item) => item.id === itemToRemove.id);
         cartArr.splice(index, 1);
     } else {
         itemToRemove.quantity--;
     }
+    localStorage.setItem("cart", JSON.stringify(cartArr));
     updateCart();
 };
 
 const updateCart = () => {
-    ulListCart.innerHTML = '';
+    ulListCart.innerHTML = "";
+
+    const cartFromStorage = localStorage.getItem("cart");
+    if (cartFromStorage) {
+        cartArr = JSON.parse(cartFromStorage);
+    }
 
     cartArr.forEach((item) => {
         const ulList = document.querySelector(".cart__list");
@@ -149,24 +210,20 @@ const updateCart = () => {
 
 const cartHandler = () => {
     if (cartArr.length === 0) {
-        cartTotal.classList.add("cart__total--hide");
+        cartItems.classList.add("cart__items--hide");
         cartEmpty.classList.remove("cart__empty--hide");
     } else {
-        cartTotal.classList.remove("cart__total--hide");
+        cartItems.classList.remove("cart__items--hide");
         cartEmpty.classList.add("cart__empty--hide");
     }
 };
 
-// function checking the amount of all items and assigns this value to the badge
-// the function is executed each time any button is pressed
 const badgeHandler = () => {
-    const badge = document.querySelector(".cart__badge");
+    const badges = document.querySelectorAll(".cart__badge");
     let badgeValue = cartArr.reduce((total, item) => total + item.quantity, 0);
-    badge.innerText = badgeValue;
+    badges.forEach((badge) => (badge.innerText = badgeValue));
 };
 
-// function checking total price of all items from the cart
-// the function is executed each time any button is pressed
 const totalPriceHandler = () => {
     const totalPrice = document.querySelector(".total__price");
     let totalPriceValue = cartArr.reduce(
@@ -175,3 +232,20 @@ const totalPriceHandler = () => {
     );
     totalPrice.innerText = totalPriceValue.toFixed(2) + " zł";
 };
+
+const cartButtonHandler = () => {
+    cartSection.classList.toggle("cart--active");
+    productSection.classList.toggle("onlyCart");
+    cartIconSvg.classList.toggle("cartIcon__svg--hide");
+    cancelIconSvg.classList.toggle("cartCancel__svg--hide");
+};
+
+const removeAllButtonHandler = () => {
+    cartArr = [];
+    localStorage.removeItem("cart");
+    updateCart();
+};
+
+cartButton.addEventListener("click", cartButtonHandler);
+removeAllButton.addEventListener("click", removeAllButtonHandler);
+selectedIngredients.addEventListener("keyup", renderProducts);

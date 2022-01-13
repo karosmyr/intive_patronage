@@ -13,30 +13,78 @@
     </head>
 
     <body>
+        <header class="header">
+            <h2 class="header__title">Wybierz pizze:</h2>
+            <div class="header__cart">
+                <h2 class="header__cart-title">
+                    Koszyk
+                    <div class="cart__badge-container">
+                        <span class="cart__badge">0</span>
+                    </div>
+                </h2>
+            </div>
+            <button class="cart__icon">
+                <object
+                    class="cartIcon__svg"
+                    data="cartIcon.svg"
+                    width="36"
+                ></object>
+                <object
+                    class="cartCancel__svg cartCancel__svg--hide"
+                    data="cartCancel.svg"
+                    width="60"
+                ></object>
+                <div class="cart__badge-container">
+                    <span class="cart__badge">0</span>
+                </div>
+            </button>
+        </header>
         <main class="main">
             <section class="product">
-                <h2 class="product__header">Wybierz pizze:</h2>
                 <div class="product__wrapper">
-                    <ul class="product__container">
-                        <div class="spinner"></div>
-                    </ul>
+                    <div class="product__sort-container">
+                        <input
+                            type="text"
+                            class="product__select product__ingredients--sort"
+                            placeholder="Wpisz składniki oddzielone przecinkiem"
+                        />
+                        <select
+                            class="product__select product--sort"
+                            onchange="renderProducts()"
+                        >
+                            <option value="sortStrAsc" selected>
+                                sortuj po nazwie rosnąco (A-Z)
+                            </option>
+                            <option value="sortStrDesc">
+                                sortuj po nazwie malejąco (Z-A)
+                            </option>
+                            <option value="sortNumAsc">
+                                sortuj po cenie rosnąco
+                            </option>
+                            <option value="sortNumDesc">
+                                sortuj po cenie malejąco
+                            </option>
+                        </select>
+                    </div>
+                    <div class="product__filter-info"></div>
+                    <div class="spinner"></div>
+                    <ul class="product__container"></ul>
                 </div>
             </section>
             <section class="cart">
-                <h2 class="cart__header">
-                    <span>Koszyk</span>
-                    <div class="badge__container">
-                        <span id="badge" class="cart__badge">0</span>
-                    </div>
-                </h2>
-                <div id="cart-order" class="cart__order">
-                    <div id="empty" class="cart__empty">
+                <div class="cart__order">
+                    <div class="cart__empty">
                         <p>Głodny?<br />Zamów naszą pizzę!</p>
                     </div>
-                    <ul class="cart__list"></ul>
-                    <div class="cart__total cart__total--hide">
-                        <span>Do zapłaty:</span>
-                        <span class="total__price"></span>
+                    <div class="cart__items cart__items--hide">
+                        <ul class="cart__list"></ul>
+                        <div class="cart__total">
+                            <span>Do zapłaty:</span>
+                            <span class="total__price"></span>
+                        </div>
+                        <button class="button button--removeAll">
+                            Wyczyść koszyk
+                        </button>
                     </div>
                 </div>
             </section>
